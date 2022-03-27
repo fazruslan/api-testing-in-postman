@@ -1,0 +1,191 @@
+{
+	"info": {
+		"_postman_id": "2b2676a3-34c3-467f-b3cb-f37bb65e6afc",
+		"name": "Reqres",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a simple user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function getRandomName() {\r",
+							"  var text = \"\";\r",
+							"  var symbols = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\";\r",
+							"\r",
+							"  for (var i = 0; i < 5; i++) {\r",
+							"    text += symbols.charAt(Math.floor(Math.random() * symbols.length));\r",
+							"  }\r",
+							"  return text;\r",
+							"}\r",
+							"\r",
+							"function getRandomJobName(){\r",
+							"    var text = \"\";\r",
+							"    var symbols = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\";\r",
+							"\r",
+							"    for (var i = 0; i < 5; i++) {\r",
+							"        text += symbols.charAt(Math.floor(Math.random() * symbols.length));\r",
+							"    }\r",
+							"  return text;\r",
+							"}\r",
+							"\r",
+							"pm.environment.set(\"userName\", getRandomName());\r",
+							"pm.environment.set(\"userJob\", getRandomJobName());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"console.log(responseData[\"name\"]);\r",
+							"\r",
+							"pm.test(\"User name from response equal to user name from request body\", function() {\r",
+							"    pm.expect(responseData.name).equal(pm.environment.get(\"userName\"));\r",
+							"    pm.expect(responseData.name).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User job from response equal to user job from request body\", function() {\r",
+							"    pm.expect(responseData.job).equal(pm.environment.get(\"userJob\"));\r",
+							"    pm.expect(responseData.job).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"createdUserId\", responseData[\"id\"]);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{userName}}\",\r\n    \"job\": \"{{userJob}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the all existing users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// берем данные первого попавшегося существующего пользователя\r",
+							"\r",
+							"pm.environment.set(\"existingUserId\", responseData.data[0].id);\r",
+							"pm.environment.set(\"existingUserEmail\", responseData.data[0].email);\r",
+							"pm.environment.set(\"existingUserFirstName\", responseData.data[0].first_name);\r",
+							"pm.environment.set(\"existingUserLastName\", responseData.data[0].last_name);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api/users",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a user information by Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User Id from response equal to existing user Id\", function() {\r",
+							"    pm.expect(responseData.data.id).equal(pm.environment.get(\"existingUserId\"));\r",
+							"    pm.expect(responseData.data.id).to.be.a('number')\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User email fron response equal to existing user email\", function() {\r",
+							"    pm.expect(responseData.data.email).equal(pm.environment.get(\"existingUserEmail\"));\r",
+							"    pm.expect(responseData.data.email).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User first name from response equal to existing user first name\", function() {\r",
+							"    pm.expect(responseData.data.first_name).equal(pm.environment.get(\"existingUserFirstName\"));\r",
+							"    pm.expect(responseData.data.first_name).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User last name from response equal to existing user last name\", function() {\r",
+							"    pm.expect(responseData.data.last_name).equal(pm.environment.get(\"existingUserLastName\"))\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api/users/{{existingUserId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{existingUserId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
